@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:diet_management_suppport_app/models/foodItem.dart';
 
 class AddFoodItemScreen extends StatefulWidget {
-  final Function onAddMeal;
+  final Function(FoodItem) onAddMeal;
 
   AddFoodItemScreen({required this.onAddMeal});
 
@@ -24,20 +25,20 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
     final carbs = _carbsController.text;
 
     if (name.isEmpty || calories == 0) {
-      // Pokaż błąd jeśli nazwa lub kalorie są puste
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Wprowadź nazwę posiłku i kaloryczność')),
       );
       return;
     }
 
-    final newMeal = {
-      'name': name,
-      'calories': calories,
-      'macros': '${protein}g P | ${fat}g F | ${carbs}g C'
-    };
+    // Utwórz obiekt FoodItem zamiast mapy
+    final newFoodItem = FoodItem(
+      name: name,
+      calories: calories,
+      macros: '${protein}g P | ${fat}g F | ${carbs}g C',
+    );
 
-    widget.onAddMeal(newMeal);
+    widget.onAddMeal(newFoodItem); // Przekaż FoodItem do onAddMeal
     Navigator.pop(context); // Powrót do ekranu głównego
   }
 
