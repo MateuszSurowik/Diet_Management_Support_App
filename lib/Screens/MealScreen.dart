@@ -6,13 +6,15 @@ import 'package:flutter/material.dart';
 import 'AddFoodItemScreen.dart';
 
 class MealScreen extends StatefulWidget {
+  const MealScreen({super.key});
+
   @override
   State<MealScreen> createState() => _MealScreenState();
 }
 
 class _MealScreenState extends State<MealScreen> {
   List<Meal> meals =
-      List.generate(24, (hour) => Meal(name: '${hour}:00', items: []));
+      List.generate(24, (hour) => Meal(name: '$hour:00', items: []));
 
   void _addFoodItem(String mealName, FoodItem foodItem) {
     setState(() {
@@ -30,11 +32,9 @@ class _MealScreenState extends State<MealScreen> {
       if (_selectedIndex == 0) {
         actualScreen = hoursScreen();
       } else if (_selectedIndex == 1) {
-        print("Calculator icon tapped");
-        actualScreen = BmiHomePage();
+        actualScreen = const BmiHomePage();
       } else if (_selectedIndex == 2) {
-        print("User profile icon tapped");
-        actualScreen = UserProfileScreen();
+        actualScreen = const UserProfileScreen();
       }
     });
   }
@@ -43,10 +43,10 @@ class _MealScreenState extends State<MealScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Today'),
+        title: const Text('Today'),
         actions: [
           IconButton(
-            icon: Icon(Icons.calendar_today),
+            icon: const Icon(Icons.calendar_today),
             onPressed: () {
               // Obsługa wyboru daty
             },
@@ -57,7 +57,7 @@ class _MealScreenState extends State<MealScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onBottomNavTap,
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
@@ -77,17 +77,17 @@ class _MealScreenState extends State<MealScreen> {
 
   Widget hoursScreen() {
     return ListView(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       children: [
         ...meals.map((meal) => MealSection(
               meal: meal,
               onAddFoodItem: (foodItem) => _addFoodItem(meal.name, foodItem),
             )),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         // Podsumowanie aktywności
-        Card(
+        const Card(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -111,7 +111,8 @@ class MealSection extends StatefulWidget {
   final Meal meal;
   final Function(FoodItem) onAddFoodItem;
 
-  MealSection({required this.meal, required this.onAddFoodItem});
+  const MealSection(
+      {super.key, required this.meal, required this.onAddFoodItem});
 
   @override
   State<MealSection> createState() => _MealSectionState();
@@ -121,7 +122,7 @@ class _MealSectionState extends State<MealSection> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0),
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -132,11 +133,12 @@ class _MealSectionState extends State<MealSection> {
                 Expanded(
                   child: Text(
                     widget.meal.name,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.add),
+                  icon: const Icon(Icons.add),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -154,7 +156,7 @@ class _MealSectionState extends State<MealSection> {
               return ListTile(
                 title: Text(item.name),
                 subtitle: Text('${item.calories} kcal | ${item.macros}'),
-                trailing: Icon(Icons.close),
+                trailing: const Icon(Icons.close),
                 onTap: () {
                   print("hello");
                   setState(() {
@@ -162,10 +164,10 @@ class _MealSectionState extends State<MealSection> {
                   });
                 },
               );
-            }).toList(),
+            }),
             if (widget.meal.items.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
                 child: Text('Brak dodanych produktów',
                     style: TextStyle(color: Colors.grey)),
               ),

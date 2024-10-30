@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 class BmiHomePage extends StatefulWidget {
+  const BmiHomePage({super.key});
+
   @override
-  _BmiHomePageState createState() => _BmiHomePageState();
+  BmiHomePageState createState() => BmiHomePageState();
 }
 
-class _BmiHomePageState extends State<BmiHomePage> {
+class BmiHomePageState extends State<BmiHomePage> {
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   String _result = '';
@@ -30,39 +32,39 @@ class _BmiHomePageState extends State<BmiHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('BMI Calculator'),
+        title: const Text('BMI Calculator'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             TextField(
               controller: _weightController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Weight (kg)',
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
               controller: _heightController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Height (m)',
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _calculateBMI,
-              child: Text('Calculate BMI'),
+              child: const Text('Calculate BMI'),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Text(
               _result,
-              style: TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20),
             ),
           ],
         ),
