@@ -27,7 +27,7 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
     if (name.isEmpty || calories == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Wprowadź nazwę posiłku oraz kaloryczność')),
+            content: Text('Wprowadź nazwę posiłku orazz kaloryczność')),
       );
       return;
     }
