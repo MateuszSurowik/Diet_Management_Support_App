@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
 class UserProfileScreen extends StatefulWidget {
+  const UserProfileScreen({super.key});
+
   @override
   _UserProfileScreenState createState() => _UserProfileScreenState();
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
   String name = 'Jan Kowalski';
-  String age = '25 lat';
-  String height = '180 cm';
-  String weight = '75 kg';
+  String age = '25';
+  String height = '180';
+  String weight = '75';
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
@@ -39,47 +41,48 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profil Użytkownika'),
+        title: const Text('Profil Użytkownika'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
             // Profilowe zdjęcie
-            Center(
+            const Center(
               child: CircleAvatar(
                 radius: 50,
                 backgroundImage:
                     NetworkImage('https://example.com/profile.jpg'),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             // Imię i nazwisko
             Center(
               child: Text(
                 name,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             // Wiek, wzrost i waga
             EditableInfoCard(
-              label: 'Wiek:',
+              label: 'Age:',
               controller: ageController,
             ),
             EditableInfoCard(
-              label: 'Wzrost:',
+              label: 'Height:',
               controller: heightController,
             ),
             EditableInfoCard(
-              label: 'Waga:',
+              label: 'Weight:',
               controller: weightController,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Center(
               child: ElevatedButton(
                 onPressed: _editProfile,
-                child: Text('Zapisz zmiany'),
+                child: const Text('Zapisz zmiany'),
               ),
             ),
           ],
@@ -93,13 +96,14 @@ class EditableInfoCard extends StatelessWidget {
   final String label;
   final TextEditingController controller;
 
-  EditableInfoCard({required this.label, required this.controller});
+  const EditableInfoCard(
+      {super.key, required this.label, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -109,7 +113,7 @@ class EditableInfoCard extends StatelessWidget {
               child: Center(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
               ),
             ),
@@ -117,7 +121,7 @@ class EditableInfoCard extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   hintText: 'Wprowadź $label',
                 ),
               ),

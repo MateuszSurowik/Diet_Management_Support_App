@@ -1,10 +1,12 @@
+import 'package:diet_management_suppport_app/Screens/userAddedMealsScreen';
+import 'package:diet_management_suppport_app/models/userFavMeals.dart';
 import 'package:flutter/material.dart';
 import 'package:diet_management_suppport_app/models/foodItem.dart';
 import '../services/openFoodFactsService.dart';
 
 class AddFoodItemScreen extends StatefulWidget {
   final Function(FoodItem) onAddMeal;
-
+  
   const AddFoodItemScreen({super.key, required this.onAddMeal});
 
   @override
@@ -23,6 +25,25 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
   List<dynamic> _searchResults = [];
   bool _isSearching = false;
   String _searchType = 'Nazwa';
+
+  void _navigateToUserMealsScreen() {
+    Navigator.push<int>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserAddedMealsScreen(),
+      ),
+    ).then((index) {
+      if (index != null) {
+        List<String> macros = userFavMeals[index].macros.trim().split('|');
+        _nameController.text = userFavMeals[index].name;
+        _caloriesController.text = userFavMeals[index].calories.toString();
+        _proteinController.text =
+            macros[0].substring(0, macros[0].indexOf('g'));
+        _fatController.text = macros[1].substring(1, macros[1].indexOf('g'));
+        _carbsController.text = macros[2].substring(2, macros[2].indexOf('g'));
+      }
+    });
+  }
 
   /// Wyszukiwanie produktów według wybranego typu
   void _searchProducts() async {
@@ -50,6 +71,28 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
         _isSearching = false;
       });
     }
+  }
+
+  void _quickAddToUserMeals() {
+    final name = _nameController.text;
+    final calories = int.tryParse(_caloriesController.text) ?? 0;
+    final protein = _proteinController.text;
+    final fat = _fatController.text;
+    final carbs = _carbsController.text;
+
+    if (name.isEmpty || calories == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Wprowadź nazwę posiłku i kaloryczność')),
+      );
+      return;
+    }
+    userFavMeals.add(FoodItem(
+        name: name,
+        calories: calories,
+        macros: '${protein}g P | ${fat}g F | ${carbs}g C'));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Posiłek dodany do moich posiłków')),
+    );
   }
 
   /// Funkcja ustawiająca pola na podstawie wybranego produktu
@@ -96,7 +139,13 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dodaj Posiłek'),
+        title: Text('Dodaj Posiłek'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: _navigateToUserMealsScreen,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -185,6 +234,11 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
             ElevatedButton(
               onPressed: _submitMeal,
               child: const Text('Dodaj Posiłek'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _quickAddToUserMeals,
+              child: Text('Zapisz posiłek jako własny'),
             ),
           ],
         ),
