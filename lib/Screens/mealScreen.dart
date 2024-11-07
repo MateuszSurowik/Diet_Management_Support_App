@@ -1,3 +1,4 @@
+import 'package:diet_management_suppport_app/Screens/aiAssistantScreen.dart';
 import 'package:diet_management_suppport_app/Screens/calculatorBmi.dart';
 import 'package:diet_management_suppport_app/Screens/userProfileScreen.dart';
 import 'package:diet_management_suppport_app/models/foodItem.dart';
@@ -13,12 +14,13 @@ class MealScreen extends StatefulWidget {
 }
 
 class _MealScreenState extends State<MealScreen> {
-  List<Meal> meals =
+  List<Meal> Hours =
       List.generate(24, (hour) => Meal(name: '$hour:00', items: []));
+  List<FoodItem> userMeals = [];
 
   void _addFoodItem(String mealName, FoodItem foodItem) {
     setState(() {
-      final meal = meals.firstWhere((m) => m.name == mealName);
+      final meal = Hours.firstWhere((m) => m.name == mealName);
       meal.items.add(foodItem);
     });
   }
@@ -30,10 +32,12 @@ class _MealScreenState extends State<MealScreen> {
     setState(() {
       _selectedIndex = index;
       if (_selectedIndex == 0) {
-        actualScreen = hoursScreen();
+        actualScreen = hoursScreen(userMeals);
       } else if (_selectedIndex == 1) {
         actualScreen = BmiHomePage();
       } else if (_selectedIndex == 2) {
+        actualScreen = AiAssistantScreen();
+      } else if (_selectedIndex == 3) {
         actualScreen = UserProfileScreen();
       }
     });
@@ -55,6 +59,8 @@ class _MealScreenState extends State<MealScreen> {
       ),
       body: actualScreen,
       bottomNavigationBar: BottomNavigationBar(
+        unselectedItemColor: Colors.black,
+        selectedItemColor: Colors.black,
         currentIndex: _selectedIndex,
         onTap: _onBottomNavTap,
         items: const [
@@ -67,6 +73,10 @@ class _MealScreenState extends State<MealScreen> {
             label: 'Calculator',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.question_answer_outlined),
+            label: 'Ask AI',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
           ),
@@ -75,13 +85,13 @@ class _MealScreenState extends State<MealScreen> {
     );
   }
 
-  Widget hoursScreen() {
+  Widget hoursScreen(List<FoodItem> userMeals) {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        ...meals.map((meal) => MealSection(
-              meal: meal,
-              onAddFoodItem: (foodItem) => _addFoodItem(meal.name, foodItem),
+        ...Hours.map((hour) => MealSection(
+              meal: hour,
+              onAddFoodItem: (foodItem) => _addFoodItem(hour.name, foodItem),
             )),
         const SizedBox(height: 20),
         // Podsumowanie aktywności
@@ -111,8 +121,11 @@ class MealSection extends StatefulWidget {
   final Meal meal;
   final Function(FoodItem) onAddFoodItem;
 
-  const MealSection(
-      {super.key, required this.meal, required this.onAddFoodItem});
+  MealSection({
+    super.key,
+    required this.meal,
+    required this.onAddFoodItem,
+  });
 
   @override
   State<MealSection> createState() => _MealSectionState();
@@ -143,11 +156,10 @@ class _MealSectionState extends State<MealSection> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AddFoodItemScreen(
-                          onAddMeal: (foodItem) =>
-                              widget.onAddFoodItem(foodItem),
-                        ),
-                      ),
+                          builder: (context) => AddFoodItemScreen(
+                                onAddMeal: (foodItem) =>
+                                    widget.onAddFoodItem(foodItem),
+                              )),
                     );
                   },
                 ),
@@ -169,7 +181,7 @@ class _MealSectionState extends State<MealSection> {
             if (widget.meal.items.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Text('Brak dodanych produktów',
+                child: Text('Brak dodanych posiłków',
                     style: TextStyle(color: Colors.grey)),
               ),
           ],
