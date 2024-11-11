@@ -8,7 +8,7 @@ class UserAddedMealsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    userMeals = userFavMeals;
+    userMeals = userFavProducts;
     return Scaffold(
       appBar: AppBar(
         title: Text('Moje Dodane Posiłki'),

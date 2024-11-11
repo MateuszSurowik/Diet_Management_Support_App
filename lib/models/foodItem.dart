@@ -1,6 +1,6 @@
 class FoodItem {
   final String name;
-  final int calories;
+  final double calories;
   final String macros;
 
   FoodItem({
@@ -13,7 +13,7 @@ class FoodItem {
   factory FoodItem.fromMap(Map<String, dynamic> map) {
     return FoodItem(
       name: map['name'] as String,
-      calories: map['calories'] as int,
+      calories: map['calories'] as double,
       macros: map['macros'] as String,
     );
   }

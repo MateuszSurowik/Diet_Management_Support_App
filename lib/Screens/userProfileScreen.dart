@@ -65,7 +65,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            // Wiek, wzrost i waga
             EditableInfoCard(
               label: 'Age:',
               controller: ageController,
