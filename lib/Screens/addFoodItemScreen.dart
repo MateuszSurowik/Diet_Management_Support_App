@@ -9,6 +9,8 @@ class AddFoodItemScreen extends StatefulWidget {
   final Function(FoodItem) onAddMeal;
   AddFoodItemScreen({required this.onAddMeal});
 
+  const AddFoodItemScreen({super.key, required this.onAddMeal});
+
   @override
   _AddFoodItemScreenState createState() => _AddFoodItemScreenState();
 }
@@ -210,6 +212,8 @@ class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
     if (name.isEmpty || calories == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Wprowadź nazwę posiłku i kaloryczność')),
+        const SnackBar(
+            content: Text('Wprowadź nazwę posiłku orazz kaloryczność')),
       );
       return;
     }
