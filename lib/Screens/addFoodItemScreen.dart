@@ -11,10 +11,10 @@ class AddFoodItemScreen extends StatefulWidget {
   const AddFoodItemScreen({super.key, required this.onAddMeal});
 
   @override
-  _AddFoodItemScreenState createState() => _AddFoodItemScreenState();
+  AddFoodItemScreenState createState() => AddFoodItemScreenState();
 }
 
-class _AddFoodItemScreenState extends State<AddFoodItemScreen> {
+class AddFoodItemScreenState extends State<AddFoodItemScreen> {
   final OpenFoodFactsApi api = OpenFoodFactsApi();
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
