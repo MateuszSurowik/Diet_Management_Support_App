@@ -1,27 +1,83 @@
+import 'package:diet_management_suppport_app/main.dart';
+import 'package:diet_management_suppport_app/models/userLimits.dart';
+import 'package:diet_management_suppport_app/services/firebaseClient.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart'; // Importujemy percent_indicator
-
 import 'package:diet_management_suppport_app/models/foodItem.dart';
 import 'package:diet_management_suppport_app/models/meal.dart';
 import 'package:diet_management_suppport_app/widgets/mealSection.dart';
 
 class MealSelectionScreen extends StatefulWidget {
-  const MealSelectionScreen({super.key});
+  MealSelectionScreen({super.key, required this.track, required this.date});
+  bool track = false;
+  DateTime date;
 
   @override
   State<MealSelectionScreen> createState() => _MealSelectionScreenState();
 }
 
 class _MealSelectionScreenState extends State<MealSelectionScreen> {
-  List<Meal> Hours =
-      List.generate(24, (hour) => Meal(name: '$hour:00', items: []));
+  List<Meal> Hours = userMealData;
   List<FoodItem> userMeals = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Ładowanie posiłków z Firebase po starcie ekranu
+    Firebaseclient().loadMealsForDate(
+      userId: userId,
+      date: widget.date,
+      onMealsLoaded: (meals) {
+        setState(() {
+          // Sprawdzanie godzin w bazie danych
+          final mealHours = meals.map((meal) => meal.name).toSet();
+          final allHours = List.generate(
+              24, (index) => '$index:00'); // Lista godzin 0:00 - 23:00
+          Hours = allHours.map((hour) {
+            // Jeśli godzina jest w bazie danych, użyj danych z Firebase, w przeciwnym razie przypisz pustą listę
+            return meals.firstWhere(
+              (meal) => meal.name == hour,
+              orElse: () => Meal(name: hour, items: []),
+            );
+          }).toList();
+        });
+      },
+    );
+    Firebaseclient().loadGlassesForDate(
+      userId: userId,
+      date: widget.date,
+      onGlassesLoaded: (glasses) {
+        setState(() {
+          userGlasses = glasses;
+        });
+      },
+    );
+  }
+
+  void _addWaterGlass() {
+    setState(() {
+      userGlasses.add(false); // Dodanie nowej szarej szklanki
+    });
+  }
+
+  void _toggleGlass(int index) {
+    setState(() {
+      userGlasses[index] = !userGlasses[index];
+      Firebaseclient().updateGlassesAndSaveToDatabase(
+          userId: userId,
+          glasses: userGlasses,
+          date: widget.date); // Zmiana stanu szklanki
+    });
+  }
 
   // Funkcja do dodawania posiłków
   void _addFoodItem(String mealName, FoodItem foodItem) {
     setState(() {
-      final meal = Hours.firstWhere((m) => m.name == mealName);
-      meal.items.add(foodItem);
+      final hour = Hours.firstWhere((m) => m.name == mealName);
+      hour.items.add(foodItem);
+      userMealData = Hours;
+      Firebaseclient().addMeal(
+          userId: userId, mealDate: DateTime.now(), foodItem: foodItem);
     });
   }
 
@@ -31,7 +87,6 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
 
   // Funkcja pomocnicza do parsowania macros
   Map<String, double> _parseMacros(String macros) {
-    // Wyciąganie wartości białka, tłuszczu i węglowodanów
     final regex = RegExp(r'(\d+)\s*g\s([A-Za-z])');
     final matches = regex.allMatches(macros);
 
@@ -105,112 +160,159 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: ListView(
-            children: [
-              ...Hours.map((hour) => MealSection(
-                  meal: hour,
-                  onAddFoodItem: (foodItem) =>
-                      _addFoodItem(hour.name, foodItem),
-                  chartRefresh: _refresher)),
-              const SizedBox(height: 20),
-              // Podsumowanie aktywności
-              const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Workout',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 8),
-                      Text('Calories burned: 300 kcal'),
-                      SizedBox(height: 8),
-                      LinearProgressIndicator(value: 0.6),
-                    ],
+          child: track
+              ? Center(
+                  child: Text(
+                    "Today, forget about tracking your diet. Enjoy this break, indulge without guilt, and savor every moment.",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: kIsDark ? Colors.white : Colors.black54,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
+                )
+              : ListView(
+                  children: [
+                    ...Hours.map((hour) => MealSection(
+                          meal: hour,
+                          onAddFoodItem: (foodItem) =>
+                              _addFoodItem(hour.name, foodItem),
+                          chartRefresh: _refresher,
+                          date: widget.date,
+                        )),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: kIsDark
+                            ? const Color.fromARGB(255, 124, 124, 124)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Water Intake',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: kIsDark ? Colors.white : Colors.black),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8.0,
+                            children: userGlasses.asMap().entries.map((entry) {
+                              int index = entry.key;
+                              bool isFilled = entry.value;
+                              return GestureDetector(
+                                onTap: () => _toggleGlass(index),
+                                child: Icon(
+                                  Icons.local_drink,
+                                  size: 40,
+                                  color: isFilled ? Colors.blue : Colors.grey,
+                                ),
+                              );
+                            }).toList()
+                              ..add(
+                                GestureDetector(
+                                  onTap: _addWaterGlass,
+                                  child: Icon(
+                                    Icons.add_circle,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
         const SizedBox(height: 10),
-        // Dodajemy kontener z wykresami kołowymi w jednym rzędzie
         Container(
-          height: 85.0, // Ustalamy maksymalną wysokość kontenera
+          height: 85.0,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: Colors.grey[200],
+            color: const Color.fromARGB(255, 124, 124, 124),
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
+              _buildCircularChart('Calories', _calculateTotalCalories(),
+                  calories, Colors.green),
               _buildCircularChart(
-                  'Calories', _calculateTotalCalories(), 1000.0, Colors.green),
+                  'Fats', _calculateTotalFats(), fat, Colors.red),
               _buildCircularChart(
-                  'Fats', _calculateTotalFats(), 100.0, Colors.red),
+                  'Carbs', _calculateTotalCarbs(), carbs, Colors.orange),
               _buildCircularChart(
-                  'Carbs', _calculateTotalCarbs(), 100.0, Colors.orange),
-              _buildCircularChart(
-                  'Protein', _calculateTotalProtein(), 100.0, Colors.blue),
+                  'Protein', _calculateTotalProtein(), protein, Colors.blue),
             ],
           ),
         ),
+        const SizedBox(height: 10),
       ],
     );
   }
+}
 
-  // Funkcja budująca wykres kołowy
-  Widget _buildCircularChart(
-      String label, double value, double maxValue, Color progressColor) {
-    double percentage = value / maxValue;
-    double excessPercentage = percentage > 1
-        ? percentage - 1
-        : 0; // Obliczamy nadmiarowy procent, jeśli przekracza 100%
+Widget _buildCircularChart(
+    String label, double value, double maxValue, Color progressColor) {
+  double percentage = value / maxValue;
+  double excessPercentage = percentage > 1
+      ? percentage - 1
+      : 0; // Obliczamy nadmiarowy procent, jeśli przekracza 100%
 
-    return Column(
-      mainAxisAlignment:
-          MainAxisAlignment.center, // Wyrównujemy wykresy pionowo
-      children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            CircularPercentIndicator(
-              radius: 24.0, // Promień głównego wykresu
-              lineWidth: 6.0, // Grubość linii głównego wykresu
-              percent: percentage.clamp(
-                  0.0, 1.0), // Główny wykres ograniczony do 100%
-              center: Text(
-                '${value.toStringAsFixed(0)}', // Wyświetlanie wartości liczbowej
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight:
-                        FontWeight.bold), // Czcionka dla wartości liczbowej
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center, // Wyrównujemy wykresy pionowo
+    children: [
+      Stack(
+        alignment: Alignment.center,
+        children: [
+          CircularPercentIndicator(
+            radius: 24.0, // Promień głównego wykresu
+            lineWidth: 6.0, // Grubość linii głównego wykresu
+            percent:
+                percentage.clamp(0.0, 1.0), // Główny wykres ograniczony do 100%
+            center: Text(
+              '${value.toStringAsFixed(0)}', // Wyświetlanie wartości liczbowej
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: kIsDark
+                    ? Colors.white
+                    : Colors.black, // Kolor tekstu zależny od trybu
               ),
-              progressColor: progressColor, // Kolor głównego postępu
-              backgroundColor: Colors.grey[300]!, // Kolor tła wykresu
             ),
-            if (excessPercentage > 0)
-              CircularPercentIndicator(
-                radius:
-                    24.0, // Promień dodatkowego wykresu (taki sam jak główny)
-                lineWidth: 6.0, // Grubość linii dodatkowego wykresu
-                percent: excessPercentage.clamp(0.0, 1.0), // Nadmiarowy procent
-                progressColor:
-                    Colors.red, // Kolor czerwony dla nadmiarowego wykresu
-                backgroundColor:
-                    Colors.transparent, // Tło ustawiamy na przezroczyste
-              ),
-          ],
+            progressColor: progressColor, // Kolor głównego postępu
+            backgroundColor: Colors.grey[300]!, // Kolor tła wykresu
+          ),
+          if (excessPercentage > 0)
+            CircularPercentIndicator(
+              radius: 24.0, // Promień dodatkowego wykresu (taki sam jak główny)
+              lineWidth: 6.0, // Grubość linii dodatkowego wykresu
+              percent: excessPercentage.clamp(0.0, 1.0), // Nadmiarowy procent
+              progressColor:
+                  Colors.red, // Kolor czerwony dla nadmiarowego wykresu
+              backgroundColor:
+                  Colors.transparent, // Tło ustawiamy na przezroczyste
+            ),
+        ],
+      ),
+      const SizedBox(height: 4), // Przestrzeń pomiędzy wykresem a podpisem
+      Text(
+        label, // Wyświetlamy podpis
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: kIsDark
+              ? Colors.white
+              : Colors.black, // Kolor podpisu zależny od trybu
         ),
-        const SizedBox(height: 4), // Przestrzeń pomiędzy wykresem a podpisem
-        Text(
-          label, // Wyświetlamy podpis
-          style: TextStyle(
-              fontSize: 10, fontWeight: FontWeight.bold), // Stylizacja podpisu
-        ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 }

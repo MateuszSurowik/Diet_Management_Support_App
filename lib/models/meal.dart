@@ -26,4 +26,9 @@ class Meal {
       'items': items.map((item) => item.toMap()).toList(),
     };
   }
+
+  // Funkcja zliczająca całkowite kalorie
+  double calculateTotalCalories() {
+    return items.fold(0, (sum, item) => sum + item.calories);
+  }
 }
