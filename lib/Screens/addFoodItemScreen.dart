@@ -1,5 +1,8 @@
-import 'package:diet_management_suppport_app/Screens/userAddedMealsScreen';
+import 'package:diet_management_suppport_app/Screens/userAddedMealsScreen.dart';
+import 'package:diet_management_suppport_app/main.dart';
 import 'package:diet_management_suppport_app/models/userFavMeals.dart';
+import 'package:diet_management_suppport_app/models/userLimits.dart';
+import 'package:diet_management_suppport_app/services/firebaseClient.dart';
 import 'package:flutter/material.dart';
 import 'package:diet_management_suppport_app/models/foodItem.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -32,7 +35,8 @@ class AddFoodItemScreenState extends State<AddFoodItemScreen> {
   String _searchType = 'Nazwa';
   int _selectedTab = 1;
 
-  void _navigateToUserMealsScreen() {
+  void _navigateToUserMealsScreen() async {
+    userFavProducts = await Firebaseclient().getFavouriteList(userId: userId);
     Navigator.push<int>(
       context,
       MaterialPageRoute(
@@ -125,6 +129,8 @@ class AddFoodItemScreenState extends State<AddFoodItemScreen> {
           macros:
               '${totalProteins}g P | ${totalFat}g F | ${totalCarbohydrates}g C'));
     }
+    Firebaseclient()
+        .addFavouriteList(userId: userId, favouriteList: userFavProducts);
   }
 
   Map<String, dynamic> _calculateNutrients(
@@ -253,7 +259,9 @@ class AddFoodItemScreenState extends State<AddFoodItemScreen> {
                   child: Text(
                     "Create Meal",
                     style: TextStyle(
-                      color: _selectedTab == 0 ? Colors.blue : Colors.black,
+                      color: kIsDark
+                          ? Colors.white
+                          : (_selectedTab == 0 ? Colors.blue : Colors.black),
                     ),
                   ),
                 ),
@@ -265,7 +273,7 @@ class AddFoodItemScreenState extends State<AddFoodItemScreen> {
                       color: Colors.grey,
                       fontWeight: FontWeight.w100),
                 ),
-                SizedBox(width: 40),
+                SizedBox(width: 35),
                 TextButton(
                   onPressed: () => setState(() => _selectedTab = 1),
                   child: Text(

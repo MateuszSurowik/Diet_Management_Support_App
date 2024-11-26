@@ -12,11 +12,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   String age = '25';
   String height = '180';
   String weight = '75';
+  String calorieLimit = '2000';
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
+  final TextEditingController calorieLimitController = TextEditingController();
 
   @override
   void initState() {
@@ -26,6 +28,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     ageController.text = age;
     heightController.text = height;
     weightController.text = weight;
+    calorieLimitController.text = calorieLimit;
   }
 
   void _editProfile() {
@@ -34,6 +37,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       age = ageController.text;
       height = heightController.text;
       weight = weightController.text;
+      calorieLimit = calorieLimitController.text;
     });
   }
 
@@ -101,7 +105,7 @@ class EditableInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
+      elevation: 3,
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -123,6 +127,7 @@ class EditableInfoCard extends StatelessWidget {
                   border: const OutlineInputBorder(),
                   hintText: 'Wprowadź $label',
                 ),
+                keyboardType: TextInputType.number, // Obsługa tylko liczb
               ),
             ),
           ],

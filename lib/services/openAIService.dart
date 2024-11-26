@@ -14,10 +14,20 @@ class OpenAIService {
   }
 
   Future<String> chatGPTAPI(String prompt) async {
+    // Shadow prompt - dopisywany do każdego zapytania
+    const shadowPrompt =
+        "Jeśli pytanie nie dotyczy diety lub zdrowego stylu życia odpowiedz "
+        "\"Przepraszam nie znam odpowiedzi na to pytanie, gdyż moja wiedza "
+        "ogranicza się do zagadnień dotyczących zdrowego stylu życia oraz diety\"";
+
+    // Dodanie shadow prompta do prompta użytkownika
+    final modifiedPrompt = "$prompt\n\n$shadowPrompt";
+
     messages.add({
       'role': 'user',
-      'content': prompt,
+      'content': modifiedPrompt,
     });
+
     try {
       final res = await http.post(
         Uri.parse('https://api.openai.com/v1/chat/completions'),
